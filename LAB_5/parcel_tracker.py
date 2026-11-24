@@ -1,5 +1,8 @@
-import random
-import subprocess
+import os
+import re
+import secrets
+import shutil
+import subprocess  # nosec B404 - only used with a fixed argv list, never a shell
 import tempfile
 from datetime import date
 
@@ -47,12 +50,24 @@ def isWithCourier(trackingId):
 
 def labelPath():
     # Helper kept for the lab: not called by the demo
-    return tempfile.mktemp(suffix=".txt")
+    # mkstemp creates the file atomically, so another process cannot grab the name first
+    fd, path = tempfile.mkstemp(suffix=".txt")
+    os.close(fd)
+    return path
+
+
+HOST_PATTERN = re.compile(r"^[A-Za-z0-9.-]{1,253}$")
 
 
 def pingHub(hubAddress):
     # Helper kept for the lab: not called by the demo
-    return subprocess.check_output("ping -c 1 " + hubAddress, shell=True)
+    # no shell, and the address must look like a hostname/IP, so it cannot inject commands
+    if not HOST_PATTERN.match(hubAddress):
+        raise ValueError("invalid hub address: " + repr(hubAddress))
+    ping = shutil.which("ping")
+    if ping is None:
+        raise FileNotFoundError("ping command not found")
+    return subprocess.check_output([ping, "-c", "1", hubAddress])  # nosec B603 - validated argv, no shell
 
 
 def main():
@@ -69,7 +84,7 @@ def main():
         print("  with courier:", isWithCourier(trackingId))
         print("  cost:", shippingCost(parcels[trackingId]["weight"]))
     print(trackParcel("TRK00000")) # unknown id
-    delivery_otp = random.randint(1000, 9999)
+    delivery_otp = 1000 + secrets.randbelow(9000)  # cryptographically secure OTP
     print("Delivery OTP for", third, "is", delivery_otp)
     print("Parcels booked today:",len(parcels))
 main()
