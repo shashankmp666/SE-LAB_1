@@ -26,9 +26,16 @@ def cube_palette(level):
     return LEVEL_PALETTES[(level - 1) % len(LEVEL_PALETTES)]
 
 
+FLASH_TIME = 0.35        # seconds a completed cube flashes white
+COMPLETE_BONUS = 50      # extra points on top of the 25 per paint step
+flashes = {}             # cell -> remaining flash time
+pending_bonus = [0]      # bonus points waiting to be added to the score
+
+
 def on_cube_completed(cell):
     """Called when a cube first reaches its target colour; add a flash, sound, or bonus here."""
-    pass
+    flashes[cell] = FLASH_TIME
+    pending_bonus[0] += COMPLETE_BONUS
 
 
 def bonus_life_threshold():
@@ -99,6 +106,8 @@ class Game:
             self.level, self.score, self.lives = 1, 0, 3
             self.bonus_awarded = 0
         self.stages = {cell: 0 for cell in CELLS}
+        flashes.clear()
+        pending_bonus[0] = 0
         self.state = "play"
         self.respawn()
 
@@ -144,6 +153,13 @@ class Game:
         landed = self.player.update(dt)
         if landed:
             self.paint(landed)
+        # cube-completed bonus and flash timers (Task 3)
+        self.score += pending_bonus[0]
+        pending_bonus[0] = 0
+        for cell in list(flashes):
+            flashes[cell] -= dt
+            if flashes[cell] <= 0:
+                del flashes[cell]
         threshold = bonus_life_threshold()
         if threshold and self.score // threshold > self.bonus_awarded:
             self.bonus_awarded = self.score // threshold
@@ -183,6 +199,10 @@ class Game:
         right = [top[1], top[2], (cx, cy + CUBE_H / 2 + SIDE), (cx + CUBE_W / 2, cy + SIDE)]
         pygame.draw.polygon(screen, shade(DEFAULT_PALETTE[0], 0.45), left)
         pygame.draw.polygon(screen, shade(DEFAULT_PALETTE[0], 0.3), right)
+        if cell in flashes:
+            # blend toward white while the completion flash is active
+            k = flashes[cell] / FLASH_TIME
+            color = tuple(int(v + (255 - v) * k) for v in color)
         pygame.draw.polygon(screen, color, top)
         pygame.draw.polygon(screen, (240, 240, 240), top, 1)
 
