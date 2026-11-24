@@ -89,3 +89,17 @@ Submission is only the following three things:
 - [] A 10-second video of gameplay **before** your changes, showing the bug/broken behavior
 - [] A 10-second video of gameplay **after** your changes, showing the bug fixed and the new features working
 - [] The Chat/LLM used page link, with the complete chat history
+
+---
+
+## Lab 4 Submission (PES1UG24AM160)
+
+- `videos/before.mp4`: 10 s of the original game (skewed pyramid)
+- `videos/after.mp4`: 10 s after the fix and all features
+- `chat_history.pdf`: LLM chat history
+
+### Changes made
+1. **Task 1 (bug fix):** `cube_center` uses `row / 2` instead of `row // 2`, so the pyramid is a symmetric triangle.
+2. **Task 2:** `cube_palette(level)` returns a different 3-colour palette for each level (cycles after 4).
+3. **Task 3:** `on_cube_completed(cell)` makes the completed cube flash white and gives a +50 bonus.
+4. **Task 4:** `bonus_life_threshold()` returns 1000, so you get an extra life every 1000 points.
