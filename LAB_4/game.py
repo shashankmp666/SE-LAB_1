@@ -40,7 +40,7 @@ def on_cube_completed(cell):
 
 def bonus_life_threshold():
     """Return a score value at which the player earns an extra life, or None to disable bonus lives."""
-    pass
+    return 1000  # one extra life every 1000 points
 
 
 def cube_center(row, col):
