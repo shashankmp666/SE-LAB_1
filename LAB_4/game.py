@@ -26,7 +26,8 @@ def bonus_life_threshold():
 
 
 def cube_center(row, col):
-    return pygame.Vector2(WIDTH / 2 + (col - row // 2) * CUBE_W, 90 + row * CUBE_H)
+    # true division: each row shifts left by half a cube so the pyramid stays symmetric
+    return pygame.Vector2(WIDTH / 2 + (col - row / 2) * CUBE_W, 90 + row * CUBE_H)
 
 
 def neighbors(row, col):
