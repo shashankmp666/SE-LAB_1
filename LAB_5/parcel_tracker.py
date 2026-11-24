@@ -14,7 +14,8 @@ from datetime import date
 
 STATUS_FLOW = ["Booked", "Picked Up", "In Transit",
                "Out for Delivery", "Delivered"]
-COURIER_STATUSES = {"Picked Up", "In Transit"}
+# a parcel that is out for delivery is still with the courier
+COURIER_STATUSES = {"Picked Up", "In Transit", "Out for Delivery"}
 HOST_PATTERN = re.compile(r"^[A-Za-z0-9.-]{1,253}$")
 parcels = {}
 
@@ -41,6 +42,8 @@ def advance_status(tracking_id):
 
 def shipping_cost(weight_kg):
     """Return the shipping cost: 50 for the first kg, 30 per extra kg."""
+    if weight_kg <= 0:
+        raise ValueError("weight must be positive")
     cost = 50
     if weight_kg > 1:
         cost += (weight_kg - 1) * 30
